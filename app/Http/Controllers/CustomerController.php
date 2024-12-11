@@ -12,9 +12,27 @@ class CustomerController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    // public function index()
+    public function index(Request $request)
     {
-        $customers = Customer::all();
+        //add search feature
+        // if($request->has('search')) {
+        //     // dd($request->all());
+
+        // }
+
+        $customers = Customer::when($request->has('search'),function($query) use ($request){ //to access $request use (use)
+            $query->where('first_name','LIKE', "%$request->search%")
+            ->orWhere('last_name','LIKE', "%$request->search%")
+            ->orWhere('phone','LIKE', "%$request->search%")
+            ->orWhere('email','LIKE', "%$request->search%");
+
+        // })->get();
+        // })->orderBy('id','desc')->get();//oroder by asc and desc
+        })->orderBy('id',$request->has('order') && $request->order =='asc' ? 'ASC': 'DESC')->get();//oroder by asc and desc
+
+        //end of search
+        // $customers = Customer::all();
         // return view('customer.index',['customers'=>$customers]);
         return view('customer.index',compact('customers'));
     }
@@ -102,10 +120,50 @@ class CustomerController extends Controller
     public function destroy(string $id)
     {
         $customer = Customer::findorfail($id);
+        // if($customer->image != '/default-images/avatar.png') { //replace this to be in hard delete
+        //     File::delete(public_path($customer->image));
+        // }
+        $customer->delete();
+        return redirect()->back();
+    }
+
+
+    function trashIndex(Request $request) {
+
+        $customers = Customer::onlyTrashed()
+        ->when($request->has('search') , function ($query) use ($request) {
+            $query->where(function ($q) use ($request) {
+                $q->where('first_name', 'LIKE', "%{$request->search}%")
+                    ->orWhere('last_name', 'LIKE', "%{$request->search}%")
+                    ->orWhere('phone', 'LIKE', "%{$request->search}%")
+                    ->orWhere('email', 'LIKE', "%{$request->search}%");
+            });
+        })
+    ->orderBy('id', $request->has('order') && $request->order == 'asc' ? 'ASC' : 'DESC')
+    ->get();
+
+
+        return view('customer.trash',compact('customers'));
+
+    }
+    /**
+     * Restore specified resource from storage.
+     */
+    function restore(int $id) {//int is type hinting
+        $customer = Customer::withTrashed()->findorfail($id);
+        $customer->restore();
+        return redirect()->back();
+    }
+    /**
+     * forceDestroy specified resource from storage.
+     */
+    function forceDestroy(int $id) {
+        $customer = Customer::withTrashed()->findorfail($id);
+
         if($customer->image != '/default-images/avatar.png') {
             File::delete(public_path($customer->image));
         }
-        $customer->delete();
+        $customer->forceDelete();//dont forget its here forceDelete dont use delete only
         return redirect()->back();
     }
 }

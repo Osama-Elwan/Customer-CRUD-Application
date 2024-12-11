@@ -3,15 +3,15 @@
 @section('content')
 <div class="row justify-content-center mt-5">
     <div class="col-md-8">
-        <h3>Customers</h3>
+        <h3>Trash Data</h3>
         <div class="card">
             <div class="card-header">
                 <div class="row">
-                <div class="col-md-3">
-                    <a href="{{ route('customers.create') }}" class="btn" style="background-color: #4643d3; color: white;"><i class="fas fa-plus"></i> Create Customer</a>
+                <div class="col-md-2">
+                    <a href="{{ route('customers.index') }}" class="btn" style="background-color: #4643d3; color: white;"><i class="fas fa-chevron-left"></i> Back</a>
                 </div>
-                <div class="col-md-5">
-                    <form action="{{ route('customers.index') }}" method="GET">
+                <div class="col-md-8">
+                    <form action="{{ route('customers.trash') }}" method="GET">
                         <div class="input-group mb-3">
                             <input type="text" class="form-control" placeholder="Search anything..." aria-describedby="button-addon2" name="search" value="{{ request()->search }}">
                             <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Search</button>
@@ -19,7 +19,7 @@
                     </form>
                 </div>
                 <div class="col-md-2">
-                    <form action="{{ route('customers.index') }}" method="GET" class="form-order">
+                    <form action="{{ route('customers.trash') }}" method="GET" class="form-order">
                         <div class="input-group mb-3">
                             <select class="form-select" name="order" id="" onchange="$('.form-order').submit()">
                                 <option @selected(request()->order == 'desc') value="desc">Newest to Oldest</option>
@@ -29,7 +29,7 @@
                     </form>
                 </div>
                 <div class="col-md-2">
-                    <a href="{{ route('customers.trash') }}" class="btn btn-dark" ><i class="fas fa-trash-alt"></i> Trash</a>
+
                 </div>
                 </div>
 
@@ -60,10 +60,10 @@
                             <td>{{ $customer->bank_account_number }}</td>
 
                             <td>
-                                <a href="{{ route('customers.edit',$customer->id) }}" style="color: #2c2c2c;" class="ms-1 me-1"><i class="far fa-edit"></i></a>
-                                <a href="{{ route('customers.show',$customer->id) }}" style="color: #2c2c2c;" class="ms-1 me-1"><i class="far fa-eye"></i></a>
+
+                                <a href="{{ route('customers.restore',$customer->id) }}" style="color: #2c2c2c;" class="ms-1 me-1"><i class="fas fa-redo"></i></a>
                                 <a href="javascript:;" onclick="if(confirm('Are You sure to delete the customer?')) $('.form-{{ $customer->id }}').submit()" style="color: #2c2c2c;" class="ms-1 me-1"><i class="fas fa-trash-alt"></i></a>
-                                <form class="form-{{ $customer->id }}" action="{{ route('customers.destroy',$customer->id) }}" method="POST">
+                                <form class="form-{{ $customer->id }}" action="{{ route('customers.force.destroy',$customer->id) }}" method="POST">
                                     @csrf
                                     @method('DELETE')
                                     {{-- <button type="submit" class="btn"><i class="fas fa-trash-alt"></i></button> --}}
